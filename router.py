@@ -1,34 +1,39 @@
 from scapy.all import * 
-mac_1 = "08:00:27:70:10:E7"
-mac_2 = "08:00:27:93:77:9B" 
+mac_1 = "08:00:27:b4:4e:39"
+mac_2 = "08:00:27:62:9a:36" 
 
 iface_1 = "enp0s8"
 iface_2 = "enp0s9"
 
-ip_1 = "192.168.56.101"
-ip_2 = "192.168.167.2"
+ip_1 = "192.168.56.102"
+ip_2 = "192.168.167.3"
 
-dst_mac_1 = "08:00:00:00:13:37"
-dst_mac_2 = "0A:00:27:00:00:30"
+dst_mac_2 = "08:00:00:00:13:37"
+dst_mac_1 = "0A:00:27:00:00:07"
 
 dst_ip_1 = "192.168.56.1"
 dst_ip_2 = "192.168.167.1"
 
 
-def handle_packet(pkt):
+def handle_packet(pkt, client_1_ip, client_2_ip):
 
-    if (pkt[Ether].dst == mac_1):
+    if (pkt[IP].src == client_1_ip):
         pkt.show()
-        pkt[Ether].dst = dst_nac_2
-        pkt[Ether].src = mac_2
+        
+        if UDP in pkt or TCP in pkt:
+            pkt[IP].src = ip_2
 
-        pkt[IP].dst = ip_2
-        pkt[IP].dst = dst_ip_2
+        pkt[Ether].dst = dst_mac_2
+        pkt[Ether].src = mac_2
 
         sendp(pkt, iface_2)
 
-    elif(pkt[Ether].dst == mac_2):
+    elif(pkt[IP].src == client_2_ip): 
         pkt.show()
+        
+        if UDP in pkt or TCP in pkt:
+            pkt[IP].src = ip_1
+
         pkt[Ether].dst = dst_mac_1
         pkt[Ether].src = mac_1
 
@@ -39,8 +44,17 @@ def handle_packet(pkt):
     
     pkt.show()
 
+def get_args():
+    parser = argparse.ArgumentParser(description='Send data to server.')
+    parser.add_argument('client_1_ip', type=str,
+                        help='first client\'s ip')
+    parser.add_argument('client_2_ip', type=str,
+                        help='second client\'s ip')
+    return parser.parse_args()
+
 def main():
-    pkts = sniff(prn = handle_packet)
+    args = get_args()
+    pkts = sniff(prn = handle_packet(args.client_1_ip, args.client_2_ip)
 
 if __name__ == "__main__":
     main()
