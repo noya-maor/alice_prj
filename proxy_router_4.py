@@ -1,40 +1,41 @@
-from scapy.all import *
+from scapy.all import UDP, TCP, IP, Ether, show, sniff, sendp
 import argparse
 
-mac_1 = "08:00:27:b4:4e:39"
-mac_2 = "08:00:27:62:9a:36" 
+MAC_1 = "08:00:27:b4:4e:39"
+MAC_2 = "08:00:27:62:9a:36" 
 
-iface_1 = "enp0s8"
-iface_2 = "enp0s9"
+IFACE_1 = "enp0s8"
+IFACE_2 = "enp0s9"
 
-ip_1 = "192.168.56.102"
-ip_2 = "192.168.167.3"
+IP_1 = "192.168.56.102"
+IP_2 = "192.168.167.3"
 
-dst_mac_2 = "08:00:00:00:13:37"
-dst_mac_1 = "0A:00:27:00:00:07"
-
-dst_ip_1 = "192.168.56.1"
-dst_ip_2 = "192.168.167.1"
-
+DST_MAC_2 = "08:00:00:00:13:37"
+DST_MAC_1 = "0A:00:27:00:00:07"
 
 def handle_packet(pkt, client_1_ip, client_2_ip):
-    if IP in pkt and (UDP in pkt or TCP in pkt):
+    if IP in pkt:
         if(pkt[IP].src == client_1_ip):
             pkt[IP].src = ip_2
         elif(pkt[IP].src == client_2_ip):
             pkt[IP].src = ip_1
 
-    if (pkt[Ether].dst == mac_1):
-        pkt.show()
-        pkt[Ether].dst = dst_mac_2
-        pkt[Ether].src = mac_2
-        sendp(pkt, iface_2)
+        if(pkt[IP].dst == IP_2):
+            pkt[IP].dst = client_1_ip
+        elif(pkt[IP].dst == IP_1):
+            pkt[IP].dst = client_2_ip
 
-    elif(pkt[Ether].dst == mac_2):
+    if (pkt[Ether].dst == MAC_1):
         pkt.show()
-        pkt[Ether].dst = dst_mac_1
-        pkt[Ether].src = mac_1
-        sendp(pkt, iface_1)
+        pkt[Ether].dst = DST_MAC_2
+        pkt[Ether].src = MAC_2
+        sendp(pkt, IFACE_2)
+
+    elif(pkt[Ether].dst == MAC_2):
+        pkt.show()
+        pkt[Ether].dst = DST_MAC_1
+        pkt[Ether].src = MAC_1
+        sendp(pkt, IFACE_1)
     pkt.show()
 
 
