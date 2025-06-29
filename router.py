@@ -16,8 +16,8 @@ DST_IP_1 = "192.168.56.1"
 DST_IP_2 = "192.168.167.1"
 
 ID_PORT = 10000
-NAT_TABLE = {} #{key = (src ip, src_port), value = id_port}
-REV_TABLE = {} #{key = id_port, value = (src ip, src_port)}
+NAT_TABLE = {} #{key = (src ip, dst_ip, src_port), value = id_port}
+REV_TABLE = {} #{key = id_port, value = (src ip, dst_ip src_port)}
 def handle_packet(pkt):
     global ID_PORT
     if pkt[Ether].dst == MAC_1:
